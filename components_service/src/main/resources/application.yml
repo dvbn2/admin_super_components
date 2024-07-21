@@ -1,0 +1,83 @@
+server:
+  port: 8800
+spring:
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+  servlet:
+    multipart:
+      max-file-size: 10MB        # 设置单个文件最大大小为10MB
+      max-request-size: 100MB    # 设置多个文件大小为100MB
+  profiles:
+    active: local # 引用application-dev.yml文件
+  main:
+    allow-circular-references: true
+  datasource:
+    driver-class-name: ${database.mysql.datasource.driver-class-name}
+    url: jdbc:mysql://${database.mysql.datasource.host}:${database.mysql.datasource.port}/${database.mysql.datasource.database}?useSSL=false&serverTimezone=UTC
+    username: ${database.mysql.datasource.username}
+    password: ${database.mysql.datasource.password}
+
+  data:
+    redis:
+      host: ${database.redis.host}
+      port: ${database.redis.port}
+      database: ${database.redis.database}
+      lettuce:
+        pool:
+          max-active: ${database.redis.lettuce.pool.max-active}
+          max-idle: ${database.redis.lettuce.pool.max-idle}
+          min-idle: ${database.redis.lettuce.pool.min-idle}
+          time-between-eviction-runs: ${database.redis.lettuce.pool.time-between-eviction-runs}
+
+logging:
+  level:
+    com:
+      components:
+        mapper: debug
+        service: info
+        controller: info
+
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: true #开启驼峰命名
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.components.model.domain
+  global-config:
+    db-config:
+      logic-delete-field: isDelete # 全局逻辑删除的实体字段名
+      logic-delete-value: 1 # 逻辑已删除值（默认为 1）
+      logic-not-delete-value: 0 # 逻辑未删除值（默认为 0）
+
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+  group-configs:
+    - group: '后台管理'
+      paths-to-match: '/**'
+      #生成文档所需的扫包路径，一般为启动类目录
+      packages-to-scan: com.components
+
+
+#knife4j配置
+knife4j:
+  #是否启用增强设置
+  enable: true
+  #开启生产环境屏蔽
+  production: false
+  #是否启用登录认证
+  basic:
+    enable: true
+    username: admin
+    password: 123456
+  setting:
+    language: zh_cn
+    enable-version: true
+    enable-swagger-models: true
+    swagger-model-name: 用户模块

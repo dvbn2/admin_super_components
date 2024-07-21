@@ -1,0 +1,52 @@
+version: "3.0"
+
+services:
+  # 定义 Spring Boot 应用程序所需要的服务（容器）
+  service:
+    # 构建镜像的路径。"." 表示 Dockerfile 文件所在的当前目录
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # 指定容器名称
+    container_name: service
+    # 容器所要使用的端口号
+    ports:
+      - "8800:8800"
+    # 指定容器启动后所需要等待的其它服务的启动时间
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - app_service
+
+  # 定义数据库服务（容器）
+  mysql:
+    image: mysql:latest
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    environment:
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=123456
+    volumes:
+      - /home/docker/mysql/conf.d:/etc/mysql/conf.d
+      - /home/docker/mysql/log:/var/log/mysql
+      - /home/docker/mysql/data:/var/lib/mysql
+    networks:
+      - app_service
+
+  # 定义 Redis 服务（容器）
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: always
+    ports:
+      - '6379:6379'
+    volumes:
+      - /home/docker/redis/data:/data
+      - /home/docker/redis/conf/redis.conf:/etc/redis/redis.conf
+      - /home/docker/redis/logs:/logs
+    networks:
+      - app_service
+    #配置文件启动
+    command: redis-server /etc/redis/redis.conf
