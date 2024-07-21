@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.components.mapper.SysExceptionMapper">
+
+    <resultMap id="BaseResultMap" type="com.components.model.domain.SysException">
+        <id property="id" column="id" jdbcType="BIGINT"/>
+        <result property="ipAddress" column="ip_address" jdbcType="VARCHAR"/>
+        <result property="requestMethod" column="request_method" jdbcType="VARCHAR"/>
+        <result property="requestApi" column="request_api" jdbcType="VARCHAR"/>
+        <result property="requestParameter" column="request_parameter" jdbcType="VARCHAR"/>
+        <result property="exceptionType" column="exception_type" jdbcType="VARCHAR"/>
+        <result property="exceptionDescription" column="exception_description" jdbcType="VARCHAR"/>
+        <result property="createUser" column="create_user" jdbcType="BIGINT"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="status" column="status" jdbcType="TINYINT"/>
+        <result property="isDelete" column="is_delete" jdbcType="TINYINT"/>
+    </resultMap>
+</mapper>
