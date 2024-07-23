@@ -7,6 +7,7 @@ import com.components.model.dto.user.UserLoginDTO;
 import com.components.model.dto.user.UserPageDTO;
 import com.components.model.dto.user.UserSaveDTO;
 import com.components.model.result.PageResult;
+import com.components.model.result.Result;
 import com.components.model.vo.common.TokenVO;
 import com.components.model.vo.user.UserPageVO;
 
@@ -28,4 +29,7 @@ public interface UserService extends IService<User> {
     Boolean deleteById(Long id);
 
     Boolean logout(String token);
+
+    Result<String> listper();
+
 }

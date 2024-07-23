@@ -38,6 +38,11 @@ public class UserController {
         return Result.success("登录成功", token);
     }
 
+    @GetMapping("/list")
+    public Result<String> list(){
+        return userService.listper();
+    }
+
     @PostMapping("/save")
     @Operation(summary = "添加用户")
     public Result<Boolean> saveUser(@RequestBody UserSaveDTO userSaveDTO) {

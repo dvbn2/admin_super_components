@@ -1,10 +1,12 @@
 package com.components.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.DigestUtil;
 import cn.hutool.jwt.JWTUtil;
+import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -16,6 +18,7 @@ import com.components.model.dto.user.UserPageDTO;
 import com.components.model.dto.user.UserSaveDTO;
 import com.components.model.enums.StatusEnum;
 import com.components.model.result.PageResult;
+import com.components.model.result.Result;
 import com.components.model.vo.user.UserPageVO;
 import com.components.service.UserService;
 import com.components.utils.CheckUtil;
@@ -27,6 +30,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -70,7 +74,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
         // 登录生成token
         Map<String, Object> info = new HashMap<>();
-        info.put("userId", user.getId());
+        info.put("user", JSON.toJSON(principal));
+        info.put("UUID", UUID.randomUUID());
         String token = JWTUtil.createToken(info, SYS_SECRET_KEY.getBytes());
 
         // 将token保存到redis中
@@ -139,6 +144,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         ThrowUtil.throwIf(StrUtil.isBlank(token), ErrorCode.PARAMS_ERROR, "用户未登录");
         // 删除token
         return stringRedisTemplate.delete(USER_LOGIN_TOKEN_KEY + token);
+    }
+
+    @Override
+    public Result<String> listper() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        LoginUser loginUser = (LoginUser) authentication.getPrincipal();
+        List<String> list = loginUser.getList();
+        return Result.success(list.toString());
     }
 }
 

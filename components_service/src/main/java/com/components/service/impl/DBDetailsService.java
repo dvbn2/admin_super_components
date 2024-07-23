@@ -13,6 +13,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -29,7 +31,10 @@ public class DBDetailsService implements UserDetailsService {
         User user = userService.getOne(new LambdaQueryWrapper<User>().eq(User::getAccount, username));
 
         ThrowUtil.throwIf(Objects.isNull(user), ErrorCode.LOGIN_FAIRED, "用户不存在");
-
-        return new LoginUser(user);
+        //TODO 查找用户权限
+        List<String> list = new ArrayList<>();
+        list.add("sys:delete");
+        list.add("sys:add");
+        return new LoginUser(user,list);
     }
 }
