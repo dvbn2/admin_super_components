@@ -33,9 +33,9 @@ public class UserController {
 
     @Operation(summary = "用户登录")
     @PostMapping("/login")
-    public Result<TokenVO> login(@RequestBody UserLoginDTO userLoginDTO, @RequestHeader(value = "Authorization", required = false) String token) {
-        TokenVO tokenVO = userService.login(userLoginDTO, token);
-        return Result.success("登录成功", tokenVO);
+    public Result<String> login(@RequestBody UserLoginDTO userLoginDTO) {
+        String token = userService.login(userLoginDTO);
+        return Result.success("登录成功", token);
     }
 
     @PostMapping("/save")

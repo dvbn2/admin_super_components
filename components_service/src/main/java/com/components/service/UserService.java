@@ -19,7 +19,7 @@ import java.util.List;
 */
 public interface UserService extends IService<User> {
 
-    TokenVO login(UserLoginDTO userLoginDTO, String token);
+    String login(UserLoginDTO userLoginDTO);
 
     Boolean saveUser(UserSaveDTO userSaveDTO);
 

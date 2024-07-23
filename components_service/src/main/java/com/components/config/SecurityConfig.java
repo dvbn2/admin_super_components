@@ -34,6 +34,8 @@ public class SecurityConfig {
                 .anyRequest() //其他请求
                 .authenticated() //需要验证
         );
+
+
         return http.build();
     }
 

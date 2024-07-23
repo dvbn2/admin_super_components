@@ -16,7 +16,7 @@ import java.util.Date;
  *
  * @TableName user
  */
-@TableName(value = "user")
+@TableName(value = "sys_user")
 @Data
 public class User implements Serializable {
     /**

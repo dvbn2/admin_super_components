@@ -1,6 +1,5 @@
 package com.components.config;
 
-import com.components.interceptor.RefreshTokenInterceptor;
 import com.components.utils.JacksonObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
@@ -32,12 +31,12 @@ public class  MvcConfig extends WebMvcConfigurationSupport {
      *
      * @param registry 拦截器注册表
      */
-    @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new RefreshTokenInterceptor(stringRedisTemplate))
-                .addPathPatterns("/**")
-                .order(0); // 拦截所有请求
-    }
+//    @Override
+//    public void addInterceptors(InterceptorRegistry registry) {
+//        registry.addInterceptor(new RefreshTokenInterceptor(stringRedisTemplate))
+//                .addPathPatterns("/**")
+//                .order(0); // 拦截所有请求
+//    }
     /**
      * 设置静态资源映射
      *

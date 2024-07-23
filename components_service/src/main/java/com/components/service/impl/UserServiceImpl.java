@@ -1,14 +1,13 @@
 package com.components.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.DigestUtil;
+import cn.hutool.jwt.JWTUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.components.constant.RedisConstant;
 import com.components.mapper.UserMapper;
 import com.components.model.domain.LoginUser;
 import com.components.model.domain.User;
@@ -17,7 +16,6 @@ import com.components.model.dto.user.UserPageDTO;
 import com.components.model.dto.user.UserSaveDTO;
 import com.components.model.enums.StatusEnum;
 import com.components.model.result.PageResult;
-import com.components.model.vo.common.TokenVO;
 import com.components.model.vo.user.UserPageVO;
 import com.components.service.UserService;
 import com.components.utils.CheckUtil;
@@ -32,9 +30,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
+
+import static com.components.constant.RedisConstant.*;
 
 /**
  * @author dvbn
@@ -53,7 +54,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     private AuthenticationManager authenticationManager;
 
     @Override
-    public TokenVO login(UserLoginDTO userLoginDTO, String token) {
+    public String login(UserLoginDTO userLoginDTO) {
         //封装Autentication对象
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userLoginDTO.getAccount(), userLoginDTO.getPassword());
 
@@ -67,29 +68,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         LoginUser principal = (LoginUser) authenticate.getPrincipal();
         User user = principal.getUser();
 
-        // 判断token是否已经存在，如果存在则直接刷新返回
-
-        Long userId = user.getId();
-        String id = stringRedisTemplate.opsForValue().get(RedisConstant.USER_LOGIN_TOKEN_KEY + token);
-        if (Objects.equals(String.valueOf(userId), id)) {
-            stringRedisTemplate.expire(RedisConstant.USER_LOGIN_TOKEN_KEY + token, RedisConstant.USER_LOGIN_TOKEN_TTL, TimeUnit.DAYS);
-            log.info("用户登录成功, token: {}", token);
-            return TokenVO.builder().token(token).userId(userId).build();
-        }
-
-        // 不相同且不为空，则删除旧的token
-        if (StrUtil.isNotBlank(id)) {
-            stringRedisTemplate.delete(RedisConstant.USER_LOGIN_TOKEN_KEY + token);
-        }
-
-        // 生成token
-        token = UUID.randomUUID().toString(true);
-        TokenVO tokenVO = TokenVO.builder().token(token).userId(userId).build();
+        // 登录生成token
+        Map<String, Object> info = new HashMap<>();
+        info.put("userId", user.getId());
+        String token = JWTUtil.createToken(info, SYS_SECRET_KEY.getBytes());
 
         // 将token保存到redis中
-        stringRedisTemplate.opsForValue().set(RedisConstant.USER_LOGIN_TOKEN_KEY + token, String.valueOf(userId), RedisConstant.USER_LOGIN_TOKEN_TTL, TimeUnit.DAYS);
-        log.info("用户登录成功, token: {}", userId);
-        return tokenVO;
+        stringRedisTemplate.opsForValue().set(USER_LOGIN_TOKEN_KEY + user.getId(), token, USER_LOGIN_TOKEN_TTL, USER_LOGIN_TOKEN_TIMEUNIT);
+        log.info("用户登录成功, token: {}", token);
+        return token;
     }
 
     @Override
@@ -151,7 +138,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     public Boolean logout(String token) {
         ThrowUtil.throwIf(StrUtil.isBlank(token), ErrorCode.PARAMS_ERROR, "用户未登录");
         // 删除token
-        return stringRedisTemplate.delete(RedisConstant.USER_LOGIN_TOKEN_KEY + token);
+        return stringRedisTemplate.delete(USER_LOGIN_TOKEN_KEY + token);
     }
 }
 
