@@ -1,13 +1,11 @@
 package com.components.filter;
 
 import cn.hutool.json.JSONObject;
-import cn.hutool.json.JSONUtil;
 import cn.hutool.jwt.JWT;
 import cn.hutool.jwt.JWTPayload;
 import cn.hutool.jwt.JWTUtil;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.components.model.domain.LoginUser;
-import com.components.model.domain.User;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
@@ -53,6 +51,11 @@ public class TokenFilter extends RequestFilter {
         JWTPayload payload = parseToken.getPayload();
         JSONObject claimsJson = payload.getClaimsJson();
         LoginUser loginUser = claimsJson.get("user", LoginUser.class);
+        //判断令牌是否过期或非法
+        String redisToken = stringRedisTemplate.opsForValue().get(loginUser.getUser());
+        if(!redisToken.equals(token)){
+            //TODO
+        }
         //把校验完的用户信息重新放入security上下文
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginUser,null,loginUser.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
